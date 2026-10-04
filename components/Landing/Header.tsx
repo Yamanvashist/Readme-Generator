@@ -22,12 +22,15 @@ export default function Header() {
             <a href="#features">Features</a>
 
             <Link
-              href="https://github.com/yamanvashist"
+              href="https://github.com/Yamanvashist/Readme-Generator"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex gap-2 items-center"
+              className="group inline-flex gap-2 items-center"
             >
-              GitHub <FaGithub size="20" />
+              GitHub{" "}
+              <span>
+                <FaGithub className="w-4 h-4 group-hover:w-5 group-hover:h-5 transition-all duration-200 ease-in-out" />
+              </span>
             </Link>
           </nav>
 
@@ -38,7 +41,7 @@ export default function Header() {
             className="group inline-flex items-center rounded-sm bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-hover hover:shadow-primary"
           >
             Generate README
-            <span className="-translate-x-2 max-w-0 opacity-0 group-hover:opacity-100 group-hover:translate-0 group-hover:max-w-xs  group-hover:ml-1.5 transition-all duration-300">
+            <span className="-translate-x-2 w-0 opacity-0 group-hover:opacity-100 group-hover:translate-0 group-hover:w-4  group-hover:ml-1.5 transition-all duration-300">
               <FaArrowRightLong />
             </span>
           </Link>
