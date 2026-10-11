@@ -81,15 +81,6 @@
 
   --shadow-primary:
     0 8px 24px rgb(0 0 0 / 0.12);
-
-  /* ─────────────────────────────────────
-     Radius
-  ───────────────────────────────────── */
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
 }
 
 @theme inline {
@@ -134,20 +125,6 @@
 
   --font-sans: var(--font-poppins);
   --font-mono: var(--font-geist-mono);
-
-  /* Shadows */
-
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-primary: var(--shadow-primary);
-
-  /* Radius */
-
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
 }
 
 * {
