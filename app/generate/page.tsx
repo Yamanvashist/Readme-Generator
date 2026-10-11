@@ -38,6 +38,8 @@ export default function Generate() {
               setSelected={setSelected}
               repoUrl={repoUrl}
               setRepoUrl={setRepoUrl}
+              file={file}
+              setFile={(file) => setFile(file)}
             />
 
             <RepositoryDetailsSection
