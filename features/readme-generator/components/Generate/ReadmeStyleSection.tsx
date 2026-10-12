@@ -8,7 +8,7 @@ import {
   RiSettings4Line,
   RiTerminalBoxLine,
 } from "react-icons/ri";
-import type { ReadmeStyleValue } from "./types";
+import type { ReadmeStyleValue } from "../../types/types";
 
 type ReadmeStyleOption = {
   title: string;

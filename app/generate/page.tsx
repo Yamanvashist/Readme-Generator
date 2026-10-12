@@ -2,27 +2,75 @@
 
 import { useState } from "react";
 
-import Header from "@/components/Generate/Header";
-import GenerateIntro from "@/components/Generate/GenerateIntro";
-import RepositorySourceSection from "@/components/Generate/RepositorySourceSection";
-import RepositoryDetailsSection from "@/components/Generate/RepositoryDetailsSection";
-import ReadmeStyleSection from "@/components/Generate/ReadmeStyleSection";
-import GenerateButton from "@/components/Generate/GenerateButton";
-import ReadmePreview from "@/components/Generate/ReadmePreview";
+import Header from "@/features/readme-generator/components/Generate/Header";
+import GenerateIntro from "@/features/readme-generator/components/Generate/GenerateIntro";
+import RepositorySourceSection from "@/features/readme-generator/components/Generate/RepositorySourceSection";
+import RepositoryDetailsSection from "@/features/readme-generator/components/Generate/RepositoryDetailsSection";
+import ReadmeStyleSection from "@/features/readme-generator/components/Generate/ReadmeStyleSection";
+import GenerateButton from "@/features/readme-generator/components/Generate/GenerateButton";
+import ReadmePreview from "@/features/readme-generator/components/Generate/ReadmePreview";
 
 import type {
   ReadmeStyleValue,
   RepositorySourceValue,
-} from "@/components/Generate/types";
+} from "@/features/readme-generator/types/types";
+
+import {
+  useGenerateReadmeURL,
+  useGenerateReadmeLocal,
+} from "@/features/readme-generator/hooks/useGenerateReadme";
 
 export default function Generate() {
   const [selected, setSelected] = useState<RepositorySourceValue>("github");
   const [repoUrl, setRepoUrl] = useState("");
   const [repoDetails, setRepoDetails] = useState("");
-  const [readmeStyle, setReadmeStyle] =
-    useState<ReadmeStyleValue>("professional");
-
+  const [readmeStyle, setReadmeStyle] = useState<ReadmeStyleValue>("professional");
   const [file, setFile] = useState<File | null>(null);
+  const [readme, setReadme] = useState("");
+
+  const {
+    mutateAsync: urlMutation,
+    isPending: isUrlPending,
+    isError: isUrlError,
+  } = useGenerateReadmeURL();
+
+  const {
+    mutateAsync: localMutation,
+    isPending: isLocalPending,
+    isError: isLocalError,
+  } = useGenerateReadmeLocal();
+
+  async function generateReadme() {
+    async function generateReadme() {
+      try {
+        if (!readmeStyle) return;
+
+        if (selected === "github") {
+          if (!repoUrl.trim()) return;
+
+          const data = await urlMutation({
+            repoUrl,
+            readmeStyle,
+            repoDetails,
+          });
+
+          setReadme(data);
+        } else if (selected === "local") {
+          if (!file) return;
+
+          const data = await localMutation({
+            zipFile: file,
+            readmeStyle,
+            repoDetails,
+          });
+
+          setReadme(data);
+        }
+      } catch (error) {
+        console.error("Failed to generate README:", error);
+      }
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -52,7 +100,7 @@ export default function Generate() {
               setReadmeStyle={setReadmeStyle}
             />
 
-            <GenerateButton />
+            <GenerateButton onClick={generateReadme} />
           </div>
         </div>
 

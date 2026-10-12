@@ -16,7 +16,7 @@ import {
   RiUploadCloud2Line,
 } from "react-icons/ri";
 import type { IconType } from "react-icons";
-import type { RepositorySourceValue } from "./types";
+import type { RepositorySourceValue } from "../../types/types";
 
 type RepoSourceItem = {
   title: string;
