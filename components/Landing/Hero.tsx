@@ -1,6 +1,34 @@
+"use client";
+import { useState } from "react";
 import { FaArrowRightLong } from "react-icons/fa6";
 
+import { useRouter } from "next/navigation";
+
 export default function Hero() {
+  const [githubUrl, setGithubUrl] = useState("");
+
+  const router = useRouter();
+
+  const generate = () => {
+    const url = githubUrl.trim();
+
+    if (!url) return;
+
+    const isValidGitHubUrl =
+      /^https?:\/\/(www\.)?github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(url) ||
+      /^(www\.)?github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(url);
+
+    if (!isValidGitHubUrl) {
+      alert("Please enter a valid GitHub repository URL.");
+      return;
+    }
+
+    const formattedUrl = url.startsWith("https") ? url : `https://${url}`;
+    localStorage.setItem("repoUrl", formattedUrl);
+
+    router.push("/generate");
+  };
+
   return (
     <section
       className="
@@ -30,7 +58,6 @@ export default function Hero() {
       >
         {/* Left — Hero Content */}
         <div className="w-full max-w-2xl">
-
           <span
             className="
               mb-5 inline-flex max-w-full
@@ -128,13 +155,15 @@ export default function Hero() {
               </span>
 
               <input
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
                 type="text"
                 aria-label="GitHub repository URL"
                 placeholder="github.com/username/repository"
                 className="
                   min-w-0 w-full
                   bg-transparent
-                  py-2.5
+                  py-2.5  
                   text-xs text-text-primary
                   outline-none
                   placeholder:text-text-subtle
@@ -145,6 +174,7 @@ export default function Hero() {
 
             <button
               type="button"
+              onClick={generate}
               className="
                 group/button
                 flex shrink-0 items-center

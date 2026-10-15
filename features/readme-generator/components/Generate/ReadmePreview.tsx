@@ -1,13 +1,13 @@
 const previewDots = [1, 2, 3];
 
 const previewLines = [
-  { className: "h-3 w-2/5 bg-success/25" },
-  { className: "h-2 w-full bg-border" },
-  { className: "h-2 w-5/6 bg-border" },
-  { className: "h-2 w-2/3 bg-border" },
-  { className: "h-2.5 w-1/3 bg-success/25", sectionStart: true },
-  { className: "h-2 w-full bg-border" },
-  { className: "h-2 w-3/4 bg-border" },
+  { className: "h-4 w-2/5 bg-success/25" },
+  { className: "h-4 w-full bg-border" },
+  { className: "h-4 w-5/6 bg-border" },
+  { className: "h-4 w-2/3 bg-border" },
+  { className: "h-4.5 w-1/3 bg-success/25", sectionStart: true },
+  { className: "h-4 w-full bg-border" },
+  { className: "h-3 w-3/4 bg-border" },
 ];
 
 export default function ReadmePreview() {
@@ -35,10 +35,6 @@ export default function ReadmePreview() {
               ))}
             </div>
           </div>
-
-          <p className="text-xs text-text-muted">
-            Your README preview will appear here
-          </p>
         </div>
       </div>
     </aside>

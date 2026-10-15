@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 
 import TanstackProvider from "@/components/provider/TanstackProvider";
+import ToastProvider from "@/components/provider/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TanstackProvider>{children}</TanstackProvider>
+        <TanstackProvider>
+          <ToastProvider />
+          {children}
+        </TanstackProvider>
       </body>
     </html>
   );
