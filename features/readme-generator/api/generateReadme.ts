@@ -15,7 +15,7 @@ export async function generateReadmeLocal(
     formData.append("repoDetail", repoDetails);
   }
 
-  const { data } = await api.post("/local", formData);
+  const { data } = await api.post("/generateFromZip", formData);
 
   return data;
 }
@@ -25,7 +25,7 @@ export async function generateReadmeURL(
   readmeStyle: ReadmeStyleValue,
   repoDetails?: string,
 ) {
-  const { data } = await api.post("/url", {
+  const { data } = await api.post("/generateFromUrl", {
     repoUrl,
     readmeStyle,
     repoDetails,

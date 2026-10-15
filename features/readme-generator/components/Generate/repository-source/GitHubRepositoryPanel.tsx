@@ -63,6 +63,8 @@ export default function GitHubRepositoryPanel({
         `https://api.github.com/repos/${owner}/${repo}`,
       );
 
+      console.log(response.data)
+
       setIsValidUrl(response.status === 200);
     } catch {
       setIsValidUrl(false);
