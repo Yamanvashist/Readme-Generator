@@ -4,4 +4,4 @@ export type ReadmeStyleValue =
   | "professional"
   | "developer"
   | "minimal"
-  | "custom";
+  | "open-source";

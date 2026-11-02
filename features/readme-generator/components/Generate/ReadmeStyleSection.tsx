@@ -4,8 +4,8 @@ import {
   RiAlignLeft,
   RiBriefcaseLine,
   RiCheckLine,
+  RiGitRepositoryLine,
   RiPaletteLine,
-  RiSettings4Line,
   RiTerminalBoxLine,
 } from "react-icons/ri";
 import type { ReadmeStyleValue } from "../../types/types";
@@ -58,15 +58,19 @@ const readmeStyles: ReadmeStyleOption[] = [
     ),
   },
   {
-    title: "Custom",
-    icon: RiSettings4Line,
-    desc: "Describe your own structure and tone",
-    value: "custom",
+    title: "Open Source",
+    icon: RiGitRepositoryLine,
+    desc: "GitHub-ready with features, contribution guidelines and license",
+    value: "open-source",
     preview: (
-      <div className="mt-3 flex h-14 flex-col justify-center gap-1.5 rounded-md border border-dashed border-border bg-surface-secondary px-2.5">
-        <div className="h-1.5 w-1/2 rounded-full border border-dashed border-border" />
-        <div className="h-1 w-full rounded-full border border-dashed border-border" />
-        <div className="h-1 w-2/3 rounded-full border border-dashed border-border" />
+      <div className="mt-3 flex h-14 flex-col justify-center gap-1.5 rounded-md border border-border-light bg-surface-secondary px-2.5">
+        <div className="h-1.5 w-2/5 rounded-full bg-success/30" />
+        <div className="flex gap-1">
+          <div className="h-3 w-1/4 rounded-sm bg-code-background" />
+          <div className="h-3 w-1/4 rounded-sm bg-code-background" />
+          <div className="h-3 w-1/4 rounded-sm bg-code-background" />
+        </div>
+        <div className="h-1 w-5/6 rounded-full bg-border" />
       </div>
     ),
   },
@@ -88,7 +92,9 @@ export default function ReadmeStyleSection({
           <RiPaletteLine size={18} />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-text-primary">README Style</h2>
+          <h2 className="text-sm font-semibold text-text-primary">
+            README Style
+          </h2>
           <p className="text-xs text-text-muted">
             Choose the tone and structure of your README
           </p>

@@ -62,9 +62,6 @@ export default function GitHubRepositoryPanel({
       const response = await axios.get(
         `https://api.github.com/repos/${owner}/${repo}`,
       );
-
-      console.log(response.data)
-
       setIsValidUrl(response.status === 200);
     } catch {
       setIsValidUrl(false);

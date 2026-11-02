@@ -1,6 +1,8 @@
 import api from "../../../api/api";
 import { ReadmeStyleValue } from "../types/types";
 
+import { README_GENERATOR_PROMPT } from "@/lib/prompts/readme-generator";
+
 export async function generateReadmeLocal(
   zipFile: File,
   readmeStyle: ReadmeStyleValue,
@@ -9,10 +11,10 @@ export async function generateReadmeLocal(
   const formData = new FormData();
 
   formData.append("zipFile", zipFile);
-  formData.append("style", readmeStyle);
+  formData.append("readmeStyle", readmeStyle);
 
   if (repoDetails) {
-    formData.append("repoDetail", repoDetails);
+    formData.append("repoDetails", repoDetails);
   }
 
   const { data } = await api.post("/generateFromZip", formData);
