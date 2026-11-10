@@ -39,7 +39,6 @@ export default function Generate() {
     useState<ReadmeStyleValue>("professional");
 
   const [file, setFile] = useState<File | null>(null);
-  const [readme, setReadme] = useState("");
 
   useEffect(() => {
     setRepoUrl(localStorage.getItem("repoUrl") || "");
@@ -71,7 +70,9 @@ export default function Generate() {
         })) as GenerateReadmeResponse;
 
         if (!data?.url) {
-          throw new Error("README generated, but no redirect URL was returned.");
+          throw new Error(
+            "README generated, but no redirect URL was returned.",
+          );
         }
 
         toast.success("README generated successfully!");
@@ -88,13 +89,21 @@ export default function Generate() {
           repoDetails,
         });
 
-        setReadme(data);
+        if (!data?.url) {
+          throw new Error(
+            "README generated, but no redirect URL was returned.",
+          );
+        }
+
+        toast.success("README generated successfully!");
+
+        router.push(data.url);
       }
     } catch (error) {
       console.error("Failed to generate README:", error);
 
       const message = axios.isAxiosError<{ message?: string; error?: string }>(
-        error
+        error,
       )
         ? (error.response?.data?.message ??
           error.response?.data?.error ??
