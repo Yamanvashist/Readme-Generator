@@ -35,27 +35,26 @@ const ignoredFolders = [
 ];
 
 const entryFilePattern =
-  /^(main|app|index|server)\.(py|cpp|cc|c|h|hpp|js|jsx|ts|tsx|java|go|rs|php|rb)$/i;
+  /^(main|app|index|server|page)\.(py|cpp|cc|c|h|hpp|js|jsx|ts|tsx|java|go|rs|php|rb|tsx)$/i;
 
-const secretFilePattern = /\.(pem|key|p12|pfx)$/i;
+const secretFilePattern = /\.(pem|key|p12|pfx|jks|keystore|ppk)$/i;
 
-const sshKeyPattern = /^(id_rsa|id_ed25519)$/i;
+const sshKeyPattern = /^(id_rsa|id_ed25519|id_ecdsa|id_dsa)$/i;
 
-export function selectSourceFiles(
-  files: GitHubTreeItem[],
-  limit = 20,
-) {
+export function selectSourceFiles(files: GitHubTreeItem[], limit = 10) {
   return files
     .filter((file) => {
       if (file.type === "tree") return false;
 
+      // take actually file name from path exm - src/main.ts -> ["src","main.ts"]
+
       const pathParts = file.path.split("/");
+
+      // pick file name with last array index exm - ["src","main.ts"] , filename = main.ts
       const fileName = pathParts[pathParts.length - 1];
 
       // Exclude generated and dependency directories
-      if (
-        pathParts.some((part) => ignoredFolders.includes(part))
-      ) {
+      if (pathParts.some((part) => ignoredFolders.includes(part))) {
         return false;
       }
 
@@ -69,10 +68,12 @@ export function selectSourceFiles(
         return false;
       }
 
+      console.log(
+        importantFileNames.has(fileName) || entryFilePattern.test(fileName),
+      );
       // Select important configuration and entry-point files
       return (
-        importantFileNames.has(fileName) ||
-        entryFilePattern.test(fileName)
+        importantFileNames.has(fileName) || entryFilePattern.test(fileName)
       );
     })
     .slice(0, limit);

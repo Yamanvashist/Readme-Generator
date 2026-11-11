@@ -18,7 +18,11 @@ import type { ProjectContext } from "@/lib/url/project-context";
 
 export async function POST(req: Request) {
   try {
-    const { repoUrl, readmeStyle, repoDetails } = await req.json();
+    const { repoUrl, readmeStyle, repoDetails } = (await req.json()) as {
+      repoUrl: string;
+      readmeStyle: string;
+      repoDetails?: unknown;
+    };
 
     if (typeof repoUrl !== "string" || !repoUrl.trim()) {
       throw new AppError("Repository URL is required.", 400);
@@ -57,6 +61,7 @@ export async function POST(req: Request) {
 
     const generatedReadme = await GenerateReadmeWithGroq(
       JSON.stringify(projectContext),
+      "GITHUB",
     );
 
     if (!generatedReadme) {

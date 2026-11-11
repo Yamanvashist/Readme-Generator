@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     };
 
     const generatedReadme = await GenerateReadmeWithGroq(
-      JSON.stringify(projectContext),
+      JSON.stringify(projectContext),"ZIP"
     );
 
     const readme = await prisma.generatedReadme.create({

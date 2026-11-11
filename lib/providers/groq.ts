@@ -1,44 +1,102 @@
 import Groq from "groq-sdk";
-import { encodingForModel } from "js-tiktoken";
+import { getEncoding } from "js-tiktoken";
 
-import { ZIP_README_GENERATOR_PROMPT } from "../prompts/zip-readme-generator-prompt";
+import { README_GENERATOR_PROMPT } from "../prompts/readme-generator-prompt";
+import { SOURCE_CONTEXT_INSTRUCTIONS } from "../prompts/source-context-instructions";
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-const encoding = encodingForModel("gpt-4o");
+// GPT-OSS uses the o200k tokenizer family.
+// This gives a useful estimate; Groq's usage is authoritative.
+const encoding = getEncoding("o200k_base");
 
-export async function GenerateReadmeWithGroq(content: string) {
+function countTokens(text: string): number {
+  return encoding.encode(text).length;
+}
+
+type ProjectSource = "GITHUB" | "ZIP";
+
+export async function GenerateReadmeWithGroq(
+  content: string,
+  source: ProjectSource,
+) {
+  const systemPrompt = README_GENERATOR_PROMPT;
+
+  const userPrompt = `
+    ${SOURCE_CONTEXT_INSTRUCTIONS[source]}
+
+    Generate a README.md for the following project.
+
+    Project Context:
+    ${content}
+  `;
+
   const messages = [
     {
       role: "system" as const,
-      content: ZIP_README_GENERATOR_PROMPT,
+      content: systemPrompt,
     },
     {
       role: "user" as const,
-      content: `
-        Generate a README.md for the following repository.
-
-        Repository Context:
-        ${content}
-      `,
+      content: userPrompt,
     },
   ];
 
-  const inputTokens = messages.reduce(
-    (total, message) => total + encoding.encode(message.content).length,
-    0,
-  );
+  // Estimate input tokens before API request
+  const systemTokens = countTokens(systemPrompt);
+  const instructionsTokens = countTokens(SOURCE_CONTEXT_INSTRUCTIONS[source]);
+  const projectTokens = countTokens(content);
 
-  console.log("Estimated input tokens:", inputTokens);
+  const estimatedInputTokens =
+    countTokens(systemPrompt) + countTokens(userPrompt);
+
+  console.group("📊 README Token Analysis");
+
+  console.log("Source:", source);
+  console.log("System Prompt Tokens:", systemTokens);
+  console.log("Source Instructions Tokens:", instructionsTokens);
+  console.log("Project Content Tokens:", projectTokens);
+  console.log("Estimated Input Tokens:", estimatedInputTokens);
+
+  console.groupEnd();
 
   const completion = await groq.chat.completions.create({
     model: "openai/gpt-oss-20b",
     messages,
-    max_completion_tokens: 1800,
+    max_completion_tokens: 4000,
     temperature: 0.2,
+    include_reasoning: false,
   });
 
-  return completion.choices[0]?.message?.content ?? "";
+  const output = completion.choices[0]?.message?.content ?? "";
+
+  // Estimate output tokens
+  const estimatedOutputTokens = countTokens(output);
+
+  console.group("📊 README Token Output");
+
+  console.log("Generated README Characters:", output.length);
+  console.log("Estimated Output Tokens:", estimatedOutputTokens);
+
+  console.log("Finish Reason:", completion.choices[0]?.finish_reason);
+
+  console.log("Message:", completion.choices[0]?.message);
+
+  console.log(
+    "Reasoning Tokens:",
+    completion.usage?.completion_tokens_details?.reasoning_tokens,
+  );
+
+  // Actual token usage reported by Groq
+  console.log("Actual API Usage:", {
+    inputTokens: completion.usage?.prompt_tokens,
+    outputTokens: completion.usage?.completion_tokens,
+    totalTokens: completion.usage?.total_tokens,
+  });
+
+  console.groupEnd();
+
+  return output;
 }
