@@ -1,6 +1,5 @@
 import { filePathsToTree, treeToString } from "file-paths-to-tree";
 
-export function convertPathToTree(path: string[]) {
-  const compactTree = treeToString(filePathsToTree(path));
-  return compactTree;
+export function convertPathToTree(paths: string[]) {
+  return treeToString(filePathsToTree(paths));
 }

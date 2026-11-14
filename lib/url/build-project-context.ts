@@ -1,10 +1,10 @@
-import type { ProjectContext } from "@/lib/url/project-context";
+import type { ProjectContext } from "@/lib/types/project-context";
 
 import type {
   GitHubMetadata,
   GitHubTreeResponse,
   GitHubSourceFile,
-} from "../url/types";
+} from "./types";
 
 interface BuildProjectContextProps {
   metadata: GitHubMetadata;

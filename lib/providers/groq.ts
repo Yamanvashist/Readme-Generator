@@ -8,8 +8,6 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-// GPT-OSS uses the o200k tokenizer family.
-// This gives a useful estimate; Groq's usage is authoritative.
 const encoding = getEncoding("o200k_base");
 
 function countTokens(text: string): number {
@@ -30,7 +28,7 @@ export async function GenerateReadmeWithGroq(
     Generate a README.md for the following project.
 
     Project Context:
-    ${content}
+    ${JSON.stringify(content)}
   `;
 
   const messages = [

@@ -7,21 +7,23 @@ import { parseGitHubRepoUrl } from "@/lib/utils/github";
 import { convertPathToTree } from "@/lib/utils/convertPathToTree";
 
 import { fetchRepository } from "@/lib/url/fetch-repository";
+import { filterFolderStructure } from "@/lib/url/filter-folder-structure";
 import { selectSourceFiles } from "@/lib/url/select-source-files";
 import { fetchSourceFiles } from "@/lib/url/fetch-source-files";
-import { buildProjectContext } from "@/lib/types/build-project-context";
+import { buildProjectContext } from "@/lib/url/build-project-context";
 
 import { GenerateReadmeWithGroq } from "@/lib/providers/groq";
 import { prisma } from "@/lib/prisma";
 
-import type { ProjectContext } from "@/lib/url/project-context";
+import type { ProjectContext } from "@/lib/types/project-context";
+import { generateReadme } from "@/lib/providers/generate-readme";
 
 export async function POST(req: Request) {
   try {
     const { repoUrl, readmeStyle, repoDetails } = (await req.json()) as {
       repoUrl: string;
       readmeStyle: string;
-      repoDetails?: unknown;
+      repoDetails?: string;
     };
 
     if (typeof repoUrl !== "string" || !repoUrl.trim()) {
@@ -32,37 +34,36 @@ export async function POST(req: Request) {
       throw new AppError("README style is required.", 400);
     }
 
-    // Parse GitHub URL
     const { ownerName, repo } = parseGitHubRepoUrl(repoUrl);
 
     // Fetch repository metadata and tree
     const { metadata, tree } = await fetchRepository(ownerName, repo);
 
-    // Build folder structure
-    const paths = tree.tree.map((item) => item.path);
+    const paths = tree.tree
+      .filter((item) => item.type === "blob")
+      .map((item) => item.path);
 
-    const folderStructure = convertPathToTree(paths);
+    // removes unnecessary folder files before converting into tree structure
+    const filteredPaths = filterFolderStructure(paths);
 
-    // Select important files
-    const filesToFetch = selectSourceFiles(tree.tree);
+    // converts path into tree Structure
+    const folderStructure = convertPathToTree(filteredPaths);
 
-    // Fetch source file contents
+    // remove unnecessary files before fetching text from each files
+    const filesToFetch = selectSourceFiles(filteredPaths);
+
     const sourceFiles = await fetchSourceFiles(ownerName, repo, filesToFetch);
 
-    // Build project context
     const projectContext: ProjectContext = buildProjectContext({
       metadata,
       tree,
       folderStructure,
       sourceFiles,
       readmeStyle,
-      repoDetails: repoDetails ?? null,
+      repoDetails: repoDetails ? { details: repoDetails } : null,
     });
 
-    const generatedReadme = await GenerateReadmeWithGroq(
-      JSON.stringify(projectContext),
-      "GITHUB",
-    );
+    const generatedReadme = await generateReadme(projectContext, "GITHUB");
 
     if (!generatedReadme) {
       throw new AppError("Failed to generate README.", 500);
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
       {
         id: readme.id,
         url: `/readme/${readme.id}`,
+        tree,
       },
       { status: 201 },
     );

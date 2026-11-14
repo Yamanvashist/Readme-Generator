@@ -1,24 +1,17 @@
 import axios from "axios";
 
-import type {
-  GitHubFileResponse,
-  GitHubSourceFile,
-  GitHubTreeItem,
-} from "./types";
+import type { GitHubFileResponse, GitHubSourceFile } from "./types";
 
 export async function fetchSourceFiles(
   ownerName: string,
   repo: string,
-  files: GitHubTreeItem[],
+  files: string[],
 ): Promise<GitHubSourceFile[]> {
   const baseUrl = `https://api.github.com/repos/${encodeURIComponent(ownerName)}/${encodeURIComponent(repo)}/contents`;
 
   const results = await Promise.allSettled(
-    files.map(async (file): Promise<GitHubSourceFile> => {
-      const encodedPath = file.path
-        .split("/")
-        .map(encodeURIComponent)
-        .join("/");
+    files.map(async (path): Promise<GitHubSourceFile> => {
+      const encodedPath = path.split("/").map(encodeURIComponent).join("/");
 
       const { data } = await axios.get<GitHubFileResponse>(
         `${baseUrl}/${encodedPath}`,
@@ -27,13 +20,13 @@ export async function fetchSourceFiles(
 
       if (data.encoding !== "base64" || !data.content) {
         return {
-          path: file.path,
+          path,
           content: null,
         };
       }
 
       return {
-        path: file.path,
+        path,
         content: Buffer.from(data.content, "base64").toString("utf-8"),
       };
     }),
@@ -41,9 +34,7 @@ export async function fetchSourceFiles(
 
   return results
     .filter(
-      (
-        result,
-      ): result is PromiseFulfilledResult<GitHubSourceFile> =>
+      (result): result is PromiseFulfilledResult<GitHubSourceFile> =>
         result.status === "fulfilled",
     )
     .map((result) => result.value);

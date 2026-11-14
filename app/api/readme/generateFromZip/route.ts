@@ -10,9 +10,8 @@ import { detectProjectLanguages } from "@/lib/zip/detect-project-languages";
 
 import { convertPathToTree } from "@/lib/utils/convertPathToTree";
 
-import { GenerateReadmeWithGroq } from "@/lib/providers/groq";
 import { prisma } from "@/lib/prisma";
-import { metadata } from "@/app/layout";
+import { generateReadme } from "@/lib/providers/generate-readme";
 
 export async function POST(req: Request) {
   try {
@@ -35,16 +34,21 @@ export async function POST(req: Request) {
         language: projectLanguages,
       },
       structure: folderStructure,
-      sourceFiles: sourceFiles,
+      sourceFiles,
       totalItems: entries.length,
-      totalFiles: filteredFiles.length,
+      totalFiles: filePaths.length,
+      analyzedFiles: filteredFiles.length,
       readmeStyle,
       repoDetails: repoDetails ?? null,
     };
 
-    const generatedReadme = await GenerateReadmeWithGroq(
-      JSON.stringify(projectContext),"ZIP"
-    );
+    console.log("[ZIP] Repository analysis:", {
+      totalItems: entries.length,
+      relevantFiles: filePaths.length,
+      analyzedFiles: filteredFiles.length,
+    });
+
+    const generatedReadme = await generateReadme(projectContext, "ZIP");
 
     const readme = await prisma.generatedReadme.create({
       data: {
@@ -63,7 +67,7 @@ export async function POST(req: Request) {
       { status: 201 },
     );
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return handleApiError(err);
   }
 }
