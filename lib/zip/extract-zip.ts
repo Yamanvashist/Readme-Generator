@@ -11,7 +11,7 @@ export async function extractZip(file: File) {
       throw new AppError("The ZIP archive is empty.", 400);
     }
 
-    return { entries, buffer, zip };
+    return entries;
   } catch (err) {
     if (err instanceof AppError) {
       throw err;

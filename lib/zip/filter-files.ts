@@ -22,146 +22,45 @@ const importantFileNames = new Set([
   "README.md",
   "LICENSE",
   ".gitignore",
-  "tsconfig.json",
-  "jsconfig.json",
-  "next.config.js",
-  "next.config.ts",
-  "next.config.mjs",
-  "vite.config.ts",
-  "vite.config.js",
-]);
-
-const ignoredFolders = new Set([
-  "node_modules",
-  "vendor",
-  ".next",
-  ".git",
-  "dist",
-  "build",
-  "coverage",
-  ".turbo",
-  ".vercel",
-  "__pycache__",
-  ".venv",
-  "venv",
-  "_lang",
-]);
-
-const ignoredExtensions = new Set([
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".webp",
-  ".ico",
-  ".svg",
-  ".avif",
-  ".pdf",
-  ".zip",
-  ".rar",
-  ".7z",
-  ".mp4",
-  ".mp3",
-  ".wav",
-  ".mov",
-  ".woff",
-  ".woff2",
-  ".ttf",
-  ".otf",
-  ".exe",
-  ".dll",
-  ".so",
-  ".dylib",
-  ".class",
-  ".jar",
-  ".map",
-]);
-
-const ignoredFiles = new Set([
-  ".DS_Store",
-  "Thumbs.db",
-  "package-lock.json",
-  "yarn.lock",
-  "pnpm-lock.yaml",
-  "bun.lock",
-  "bun.lockb",
+  ".env.example",
 ]);
 
 const entryFilePattern =
-  /^(main|app|index|server)\.(py|cpp|cc|c|h|hpp|js|jsx|ts|tsx|java|go|rs|php|rb)$/i;
+  /^(main|app|index|server|page)\.(py|cpp|cc|c|h|hpp|js|jsx|ts|tsx|java|go|rs|php|rb)$/i;
 
 const secretFilePattern = /\.(pem|key|p12|pfx)$/i;
 
 const sshKeyPattern = /^(id_rsa|id_ed25519)$/i;
 
-function shouldIgnoreFile(path: string): boolean {
-  const normalizedPath = path.replace(/\\/g, "/").replace(/^\.?\//, "");
+function isSensitiveFile(path: string): boolean {
+  const fileName = path.split("/").at(-1) ?? "";
 
-  const pathParts = normalizedPath.split("/");
-  const fileName = pathParts.at(-1) ?? "";
-
-  // Ignore unnecessary directories
-  if (pathParts.some((part) => ignoredFolders.has(part))) {
-    return true;
-  }
-
-  // Ignore environment files and secrets
-  if (
+  return (
     fileName === ".env" ||
-    fileName.startsWith(".env.") ||
+    (fileName.startsWith(".env.") && fileName !== ".env.example") ||
     secretFilePattern.test(fileName) ||
     sshKeyPattern.test(fileName)
-  ) {
-    return true;
-  }
-
-  // Ignore unwanted files
-  if (ignoredFiles.has(fileName)) {
-    return true;
-  }
-
-  // Ignore binary and media files
-  const extension = fileName.includes(".")
-    ? `.${fileName.split(".").pop()?.toLowerCase()}`
-    : "";
-
-  if (ignoredExtensions.has(extension)) {
-    return true;
-  }
-
-  return false;
+  );
 }
 
 function isImportantFile(path: string): boolean {
   const fileName = path.split("/").at(-1) ?? "";
 
-  return importantFileNames.has(fileName) || entryFilePattern.test(fileName);
+  return (
+    importantFileNames.has(fileName) ||
+    entryFilePattern.test(fileName)
+  );
 }
 
-export function filterFiles(entries: JSZip.JSZipObject[], limit = 20) {
-  // 1. Keep all relevant file paths for folder structure
-  const filePaths = entries
-    .filter((entry) => {
-      if (entry.dir) return false;
-
-      return !shouldIgnoreFile(entry.name);
-    })
-    .map((entry) => entry.name.replace(/\\/g, "/"))
-    .sort();
-
-  // 2. Select only important files for AI analysis
+export function filterFiles(
+  entries: JSZip.JSZipObject[],
+  limit = 20,
+) {
   const filteredFiles = entries
-    .filter((entry) => {
-      if (entry.dir || shouldIgnoreFile(entry.name)) {
-        return false;
-      }
-
-      return isImportantFile(entry.name);
-    })
+    .filter((entry) => !entry.dir)
+    .filter((entry) => !isSensitiveFile(entry.name))
+    .filter((entry) => isImportantFile(entry.name))
     .slice(0, limit);
 
-  return {
-    filteredFiles,
-    filePaths,
-  };
+  return filteredFiles;
 }

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-
 import { handleApiError } from "@/lib/errors/handle-api-error";
 
 import { validateZipUpload } from "@/lib/zip/validate-zip-upload";
 import { extractZip } from "@/lib/zip/extract-zip";
+import { filterFolderStructure } from "@/lib/zip/filter-folder-structure";
 import { filterFiles } from "@/lib/zip/filter-files";
-import { readSourceFiles } from "@/lib/zip/source-files";
+import { selectSourceFiles } from "@/lib/zip/select-source-files";
 import { detectProjectLanguages } from "@/lib/zip/detect-project-languages";
 
 import { convertPathToTree } from "@/lib/utils/convertPathToTree";
@@ -19,15 +19,21 @@ export async function POST(req: Request) {
 
     const { readmeStyle, zipFile, repoDetails } = validateZipUpload(formData);
 
-    const { entries } = await extractZip(zipFile);
+    const entries = await extractZip(zipFile);
 
-    const { filteredFiles, filePaths } = filterFiles(entries);
+    const allPaths = entries
+      .filter((entry) => !entry.dir)
+      .map((entry) => entry.name.replace(/\\/g, "/"));
 
-    const folderStructure = convertPathToTree(filePaths);
+    const structurePaths = filterFolderStructure(allPaths);
 
-    const sourceFiles = await readSourceFiles(filteredFiles);
+    const folderStructure = convertPathToTree(structurePaths);
 
-    const projectLanguages = await detectProjectLanguages(filePaths);
+    const filteredFiles = filterFiles(entries);
+
+    const sourceFiles = await selectSourceFiles(filteredFiles);
+
+    const projectLanguages = await detectProjectLanguages(structurePaths);
 
     const projectContext = {
       metadata: {
@@ -36,7 +42,7 @@ export async function POST(req: Request) {
       structure: folderStructure,
       sourceFiles,
       totalItems: entries.length,
-      totalFiles: filePaths.length,
+      totalFiles: structurePaths.length,
       analyzedFiles: filteredFiles.length,
       readmeStyle,
       repoDetails: repoDetails ?? null,
@@ -44,7 +50,7 @@ export async function POST(req: Request) {
 
     console.log("[ZIP] Repository analysis:", {
       totalItems: entries.length,
-      relevantFiles: filePaths.length,
+      totalFiles: structurePaths.length,
       analyzedFiles: filteredFiles.length,
     });
 
