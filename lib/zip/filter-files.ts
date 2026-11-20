@@ -54,7 +54,7 @@ function isImportantFile(path: string): boolean {
 
 export function filterFiles(
   entries: JSZip.JSZipObject[],
-  limit = 20,
+  limit = 10,
 ) {
   const filteredFiles = entries
     .filter((entry) => !entry.dir)
