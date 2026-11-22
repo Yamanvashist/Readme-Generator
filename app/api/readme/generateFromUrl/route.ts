@@ -12,14 +12,19 @@ import { selectSourceFiles } from "@/lib/url/select-source-files";
 import { fetchSourceFiles } from "@/lib/url/fetch-source-files";
 import { buildProjectContext } from "@/lib/url/build-project-context";
 
-import { GenerateReadmeWithGroq } from "@/lib/providers/groq";
 import { prisma } from "@/lib/prisma";
 
 import type { ProjectContext } from "@/lib/types/project-context";
 import { generateReadme } from "@/lib/providers/generate-readme";
 
+import { enforceRateLimit, githubRateLimit } from "@/lib/rate-limit";
+
 export async function POST(req: Request) {
   try {
+    const ratelimitResponse = await enforceRateLimit(req, githubRateLimit);
+
+    if (ratelimitResponse) return ratelimitResponse;
+
     const { repoUrl, readmeStyle, repoDetails } = (await req.json()) as {
       repoUrl: string;
       readmeStyle: string;

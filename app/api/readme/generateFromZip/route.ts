@@ -13,8 +13,14 @@ import { convertPathToTree } from "@/lib/utils/convertPathToTree";
 import { prisma } from "@/lib/prisma";
 import { generateReadme } from "@/lib/providers/generate-readme";
 
+import { enforceRateLimit, zipRateLimit } from "@/lib/rate-limit";
+
 export async function POST(req: Request) {
   try {
+    const rateLimitResponse = await enforceRateLimit(req, zipRateLimit);
+
+    if (rateLimitResponse) return rateLimitResponse;
+
     const formData = await req.formData();
 
     const { readmeStyle, zipFile, repoDetails } = validateZipUpload(formData);

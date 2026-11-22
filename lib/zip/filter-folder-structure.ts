@@ -56,8 +56,7 @@ const ignoredFiles = new Set([
 
 export function filterFolderStructure(paths: string[]) {
   return paths.filter((path) => {
-    const normalizedPath = path.replace(/\\/g, "/");
-    const segments = normalizedPath.split("/");
+    const segments = path.split("/");
     const fileName = segments.at(-1) ?? "";
 
     if (segments.some((segment) => ignoredDirectories.has(segment))) {

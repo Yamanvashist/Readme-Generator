@@ -13,7 +13,7 @@ export async function fetchRepository(
 
   const { data: metadata } = await axios.get<GitHubMetadata>(
     baseUrl,
-    { timeout: 10000 },
+    { timeout: 10000 }, 
   );
 
   const { data: tree } = await axios.get<GitHubTreeResponse>(
