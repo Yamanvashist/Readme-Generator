@@ -42,17 +42,15 @@ export default function LocalZipUploadPanel({
       return;
     }
 
-    if (selectedFile.size > 100 * 1024 * 1024) {
-      toast.error("File size must be under 100 MB.");
+    if (selectedFile.size > 20 * 1024 * 1024) {
+      toast.error("File size must be under 20 MB.");
       return;
     }
 
     setFile(selectedFile);
   };
 
-  const handleFileInputChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     handleFile(event.currentTarget.files?.[0]);
     event.currentTarget.value = "";
   };
@@ -136,7 +134,7 @@ export default function LocalZipUploadPanel({
               </span>
 
               <span className="px-1 text-[10px] text-text-subtle">
-                Maximum 100 MB
+                Maximum 20 MB
               </span>
             </div>
 

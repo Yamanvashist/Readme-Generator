@@ -75,7 +75,6 @@ export default function Generate() {
           );
         }
 
-        console.log(data?.tree)
 
         toast.success("README generated successfully!");
 
